@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BLADE & CO. — Premium Barbershop</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0a0a08;
+    --paper: #f5f0e8;
+    --gold: #c9a84c;
+    --gold-dim: #9a7a34;
+    --rust: #8b3a2a;
+    --cream: #e8e0cc;
+    --mid: #2a2820;
+    --muted: #6a6458;
+    --rule: rgba(201,168,76,0.25);
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom cursor ── */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: transform 0.08s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%,-50%);
+    transition: transform 0.18s ease, width 0.25s, height 0.25s, border-color 0.25s;
+    opacity: 0.6;
+  }
+  body:hover .cursor { opacity:1; }
+
+  /* ── Noise overlay ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 500;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.6rem 4rem;
+    border-bottom: 1px solid transparent;
+    transition: background 0.4s, border-color 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(10,10,8,0.92);
+    border-color: var(--rule);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cream);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .nav-links a:hover { opacity: 1; color: var(--gold); }
+  .nav-cta {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    padding: 0.6rem 1.5rem;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--paper); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10rem 4rem 6rem;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-tagline {
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 10vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: 0.04em;
+    color: var(--paper);
+    opacity: 0;
+    animation: fadeUp 1s 0.5s forwards;
+  }
+  .hero-h1 em {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--gold);
+  }
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 0.7rem;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 340px;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+  .hero-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+  .btn-primary {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    padding: 1rem 2.5rem;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--rust);
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+    z-index: -1;
+  }
+  .btn-primary:hover { color: var(--paper); }
+  .btn-primary:hover::after { transform: translateX(0); }
+  .btn-ghost {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cream);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { opacity: 1; color: var(--gold); }
+  .btn-ghost span { font-size: 1.1rem; }
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-img-wrap {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #1a1510 0%, #0d0d0b 100%);
+    overflow: hidden;
+  }
+  .hero-img-wrap::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, var(--ink) 0%, transparent 40%);
+  }
+  /* Decorative scissors SVG illustration */
+  .hero-deco {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 70%;
+    opacity: 0.08;
+  }
+  .hero-badge {
+    position: absolute;
+    bottom: 4rem; right: 4rem;
+    width: 110px; height: 110px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeIn 1s 1.2s forwards;
+  }
+  .hero-badge strong {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.05em;
+    display: block;
+    line-height: 1;
+    color: var(--paper);
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: 3rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.5rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeIn 1s 1.5s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+    padding: 1rem 0;
+    background: var(--mid);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    white-space: nowrap;
+    animation: marquee 22s linear infinite;
+  }
+  .marquee-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .marquee-item::before {
+    content: '✦';
+    color: var(--gold);
+    font-size: 0.5rem;
+  }
+
+  /* ── SECTION SHARED ── */
+  section { padding: 8rem 4rem; }
+  .section-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 40px; height: 1px;
+    background: var(--gold);
+  }
+  .section-h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--paper);
+  }
+  .section-h2 em {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  /* ── SERVICES ── */
+  #services { background: var(--ink); }
+  .services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 5rem;
+  }
+  .services-intro {
+    font-size: 0.7rem;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 300px;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .service-card {
+    background: var(--ink);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .service-card:hover { background: var(--mid); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-num {
+    font-size: 0.5rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0.6;
+  }
+  .service-icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+  .service-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.06em;
+    color: var(--paper);
+    margin-bottom: 0.8rem;
+  }
+  .service-desc {
+    font-size: 0.65rem;
+    line-height: 1.8;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+  .service-duration {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  /* ── PRICES ── */
+  #prices { background: var(--mid); }
+  .prices-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 6rem;
+    margin-top: 4rem;
+  }
+  .prices-note {
+    font-size: 0.68rem;
+    line-height: 2;
+    color: var(--muted);
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    margin-top: 2rem;
+  }
+  .price-tables { display: flex; flex-direction: column; gap: 3rem; }
+  .price-table-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin: 0 -0.5rem;
+  }
+  .price-row:hover { background: rgba(201,168,76,0.04); }
+  .price-name {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--cream);
+  }
+  .price-dots {
+    flex: 1;
+    margin: 0 1rem;
+    border-bottom: 1px dotted rgba(255,255,255,0.1);
+    position: relative;
+    top: -3px;
+  }
+  .price-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+  }
+  .price-badge {
+    display: inline-block;
+    font-size: 0.45rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    padding: 0.2rem 0.6rem;
+    margin-left: 0.8rem;
+    vertical-align: middle;
+  }
+
+  /* ── ABOUT ── */
+  #about {
+    background: var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  .about-visual {
+    position: relative;
+    min-height: 600px;
+    background: #151310;
+    overflow: hidden;
+  }
+  .about-visual-inner {
+    position: absolute; inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .about-big-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22rem;
+    color: rgba(201,168,76,0.06);
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+  }
+  .about-stats {
+    position: absolute;
+    bottom: 4rem; left: 4rem;
+    display: flex;
+    gap: 4rem;
+  }
+  .stat { }
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+  .about-content {
+    padding: 8rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .about-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--cream);
+    margin: 2rem 0;
+  }
+  .about-detail {
+    font-size: 0.65rem;
+    line-height: 1.9;
+    color: var(--muted);
+  }
+  .about-sig {
+    margin-top: 3rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  /* ── CONTACT ── */
+  #contact { background: var(--mid); }
+  .contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6rem;
+    margin-top: 4rem;
+  }
+  .contact-info { display: flex; flex-direction: column; gap: 2.5rem; }
+  .contact-block-title {
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .contact-block-val {
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--cream);
+  }
+  .contact-block-val a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .contact-block-val a:hover { color: var(--gold); }
+  .hours-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem 2rem;
+  }
+  .hours-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--muted);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .hours-row span:last-child { color: var(--cream); }
+
+  .contact-form { }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label {
+    display: block;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--rule);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.9rem 1rem;
+    outline: none;
+    transition: border-color 0.25s, background 0.25s;
+    appearance: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.05);
+  }
+  .form-group select option { background: var(--mid); }
+  .form-group textarea { resize: vertical; min-height: 110px; }
+  .form-submit {
+    width: 100%;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 1.1rem;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s;
+    margin-top: 0.5rem;
+  }
+  .form-submit::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--rust);
+    transform: translateX(-100%);
+    transition: transform 0.35s ease;
+    z-index: 0;
+  }
+  .form-submit span { position: relative; z-index: 1; }
+  .form-submit:hover { color: var(--paper); }
+  .form-submit:hover::after { transform: translateX(0); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    padding: 3rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--rule);
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+  .footer-copy {
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+  .footer-socials { display: flex; gap: 1.5rem; }
+  .footer-socials a {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-socials a:hover { color: var(--gold); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.3; transform: scaleY(0.6); }
+  }
+  @keyframes spin {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to   { transform: translate(-50%,-50%) rotate(360deg); }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1.4rem 2rem; }
+    .nav-links { display: none; }
+    section { padding: 5rem 2rem; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 9rem 2rem 5rem; }
+    .services-header { flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+    .services-grid { grid-template-columns: 1fr; }
+    .prices-layout { grid-template-columns: 1fr; gap: 3rem; }
+    #about { grid-template-columns: 1fr; }
+    .about-visual { min-height: 260px; }
+    .about-content { padding: 4rem 2rem; }
+    .contact-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .form-row { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">Blade & Co.</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#prices">Prices</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Book Now</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-tagline">Est. 2008 — Prague Old Town</p>
+    <h1 class="hero-h1">THE ART<br>OF THE<br><em>Perfect</em><br>CUT</h1>
+    <p class="hero-sub">Where old-world craft meets modern precision. Every visit is a ritual — not just a haircut.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Book Appointment</a>
+      <a href="#services" class="btn-ghost"><span>↓</span> Explore Services</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-img-wrap">
+      <!-- Large decorative SVG -->
+      <svg class="hero-deco" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="200" cy="200" r="160" stroke="#c9a84c" stroke-width="1"/>
+        <circle cx="200" cy="200" r="120" stroke="#c9a84c" stroke-width="0.5" stroke-dasharray="4 6"/>
+        <!-- Scissors outline -->
+        <g transform="translate(115,100) rotate(20,85,100)" stroke="#c9a84c" stroke-width="1.5" fill="none">
+          <circle cx="30" cy="30" r="20"/>
+          <circle cx="30" cy="30" r="8"/>
+          <circle cx="140" cy="30" r="20"/>
+          <circle cx="140" cy="30" r="8"/>
+          <line x1="44" y1="43" x2="130" y2="160"/>
+          <line x1="116" y1="43" x2="44" y2="160"/>
+        </g>
+        <!-- Comb outline -->
+        <g transform="translate(155,230)" stroke="#c9a84c" stroke-width="1" fill="none">
+          <rect x="0" y="0" width="90" height="18" rx="3"/>
+          <line x1="10" y1="18" x2="10" y2="40"/>
+          <line x1="20" y1="18" x2="20" y2="36"/>
+          <line x1="30" y1="18" x2="30" y2="40"/>
+          <line x1="40" y1="18" x2="40" y2="36"/>
+          <line x1="50" y1="18" x2="50" y2="40"/>
+          <line x1="60" y1="18" x2="60" y2="36"/>
+          <line x1="70" y1="18" x2="70" y2="40"/>
+          <line x1="80" y1="18" x2="80" y2="36"/>
+        </g>
+      </svg>
+      <!-- Decorative text around circle -->
+      <svg style="position:absolute;top:50%;left:50%;width:300px;height:300px;transform:translate(-50%,-50%);animation:spin 30s linear infinite;opacity:0.3" viewBox="0 0 300 300">
+        <defs><path id="circlePath" d="M 150,150 m -100,0 a 100,100 0 1,1 200,0 a 100,100 0 1,1 -200,0"/></defs>
+        <text fill="#c9a84c" font-family="DM Mono, monospace" font-size="10" letter-spacing="6">
+          <textPath href="#circlePath">BLADE &amp; CO. ✦ PREMIUM BARBERSHOP ✦ PRAGUE ✦ EST. 2008 ✦ </textPath>
+        </text>
+      </svg>
+    </div>
+    <div class="hero-badge">
+      <strong>17+</strong>
+      Years of<br>Excellence
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">Classic Cuts</div>
+    <div class="marquee-item">Hot Towel Shave</div>
+    <div class="marquee-item">Beard Sculpting</div>
+    <div class="marquee-item">Scalp Treatment</div>
+    <div class="marquee-item">Hair Coloring</div>
+    <div class="marquee-item">Junior Cuts</div>
+    <div class="marquee-item">Head Massage</div>
+    <div class="marquee-item">Luxury Grooming</div>
+    <!-- duplicate for seamless loop -->
+    <div class="marquee-item">Classic Cuts</div>
+    <div class="marquee-item">Hot Towel Shave</div>
+    <div class="marquee-item">Beard Sculpting</div>
+    <div class="marquee-item">Scalp Treatment</div>
+    <div class="marquee-item">Hair Coloring</div>
+    <div class="marquee-item">Junior Cuts</div>
+    <div class="marquee-item">Head Massage</div>
+    <div class="marquee-item">Luxury Grooming</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header">
+    <div>
+      <div class="section-label reveal">Our Craft</div>
+      <h2 class="section-h2 reveal reveal-delay-1">Services &<br><em>Treatments</em></h2>
+    </div>
+    <p class="services-intro reveal reveal-delay-2">Each service is a carefully choreographed experience, performed by masters who have spent years perfecting their technique.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <span class="service-icon">✂</span>
+      <div class="service-name">Classic Cut</div>
+      <p class="service-desc">Precision scissor or clipper cut tailored to your face shape and lifestyle. Includes hot towel neck finish and style consultation.</p>
+      <div class="service-duration">45 min</div>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">02</div>
+      <span class="service-icon">🪒</span>
+      <div class="service-name">Royal Shave</div>
+      <p class="service-desc">Traditional straight-razor shave with pre-shave oil, hot towels, and a cooling aloe finish. A meditative ritual for the discerning man.</p>
+      <div class="service-duration">60 min</div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">03</div>
+      <span class="service-icon">⚡</span>
+      <div class="service-name">Beard Sculpt</div>
+      <p class="service-desc">Expert shaping, lining, and trimming of your beard, paired with conditioning treatment to soften and define your edge.</p>
+      <div class="service-duration">30 min</div>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">04</div>
+      <span class="service-icon">◈</span>
+      <div class="service-name">Cut & Shave</div>
+      <p class="service-desc">The complete gentleman's package — precision haircut followed by a hot towel straight-razor shave. Our signature combination service.</p>
+      <div class="service-duration">90 min</div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">05</div>
+      <span class="service-icon">✦</span>
+      <div class="service-name">Color & Tone</div>
+      <p class="service-desc">Grey blending, full color, or toning using premium European pigments. Subtle or striking — your vision executed with precision.</p>
+      <div class="service-duration">75 min</div>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">06</div>
+      <span class="service-icon">◉</span>
+      <div class="service-name">Scalp Ritual</div>
+      <p class="service-desc">Deep-cleanse shampoo, scalp analysis, nourishing masque, and a 15-minute pressure-point head massage to relieve tension and stimulate growth.</p>
+      <div class="service-duration">50 min</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICES -->
+<section id="prices">
+  <div class="section-label reveal">Transparent Pricing</div>
+  <h2 class="section-h2 reveal reveal-delay-1">Our <em>Rates</em></h2>
+  <div class="prices-layout">
+    <div class="reveal reveal-delay-2">
+      <p style="font-size:0.7rem;line-height:2;color:var(--muted);margin-top:1rem">All prices include consultation, premium products, and a complimentary beverage of your choice. No hidden fees — ever.</p>
+      <div class="prices-note">
+        ✦ First-time clients receive a complimentary scalp analysis.<br><br>
+        ✦ Loyalty cards available — every 10th visit is on us.<br><br>
+        ✦ Walk-ins welcome, appointments preferred.<br><br>
+        ✦ Group bookings for 4+ receive 15% discount.
+      </div>
+    </div>
+    <div class="price-tables">
+      <div class="reveal reveal-delay-1">
+        <div class="price-table-title">Hair Services</div>
+        <div class="price-row">
+          <span class="price-name">Classic Haircut</span>
+          <span class="price-dots"></span>
+          <span class="price-val">490 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Scissor Cut</span>
+          <span class="price-dots"></span>
+          <span class="price-val">590 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Junior Cut <span style="font-size:0.6rem;color:var(--muted)">(under 14)</span></span>
+          <span class="price-dots"></span>
+          <span class="price-val">350 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Hair Coloring</span>
+          <span class="price-dots"></span>
+          <span class="price-val">from 890 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Grey Blending</span>
+          <span class="price-dots"></span>
+          <span class="price-val">from 690 Kč</span>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="price-table-title">Shave & Beard</div>
+        <div class="price-row">
+          <span class="price-name">Royal Shave</span>
+          <span class="price-dots"></span>
+          <span class="price-val">650 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Beard Sculpt & Line</span>
+          <span class="price-dots"></span>
+          <span class="price-val">390 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Beard Trim</span>
+          <span class="price-dots"></span>
+          <span class="price-val">250 Kč</span>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-3">
+        <div class="price-table-title">Packages</div>
+        <div class="price-row">
+          <span class="price-name">Cut & Shave<span class="price-badge">popular</span></span>
+          <span class="price-dots"></span>
+          <span class="price-val">990 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Cut & Beard</span>
+          <span class="price-dots"></span>
+          <span class="price-val">790 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Scalp Ritual + Cut<span class="price-badge">best value</span></span>
+          <span class="price-dots"></span>
+          <span class="price-val">890 Kč</span>
+        </div>
+        <div class="price-row">
+          <span class="price-name">Full Experience</span>
+          <span class="price-dots"></span>
+          <span class="price-val">1 490 Kč</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="padding:0">
+  <div class="about-visual">
+    <div class="about-visual-inner">
+      <div class="about-big-num">17</div>
+    </div>
+    <div class="about-stats">
+      <div class="stat reveal">
+        <div class="stat-val">17+</div>
+        <div class="stat-label">Years Open</div>
+      </div>
+      <div class="stat reveal reveal-delay-1">
+        <div class="stat-val">6</div>
+        <div class="stat-label">Master Barbers</div>
+      </div>
+      <div class="stat reveal reveal-delay-2">
+        <div class="stat-val">40k+</div>
+        <div class="stat-label">Happy Clients</div>
+      </div>
+    </div>
+  </div>
+  <div class="about-content">
+    <div class="section-label reveal">Our Story</div>
+    <h2 class="section-h2 reveal reveal-delay-1">Craft Over<br><em>Speed</em></h2>
+    <p class="about-body reveal reveal-delay-2">"We opened Blade & Co. with a single belief: that every man deserves to feel exceptional when he leaves a barber's chair."</p>
+    <p class="about-detail reveal reveal-delay-3">Founded in 2008 in the heart of Prague's Old Town, we built our reputation on unhurried appointments, honest conversation, and an obsessive attention to detail. Our barbers train for years before touching a client — and it shows in every line, every fade, every shave.<br><br>We use only professional-grade European products. Our chairs are reclined in leather. Your drink is waiting before you sit down.</p>
+    <div class="about-sig reveal reveal-delay-4">— Tomáš Novák, Founder</div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label reveal">Find Us</div>
+  <h2 class="section-h2 reveal reveal-delay-1">Book Your<br><em>Visit</em></h2>
+  <div class="contact-layout">
+    <div class="contact-info">
+      <div class="reveal reveal-delay-1">
+        <div class="contact-block-title">Address</div>
+        <div class="contact-block-val">
+          Celetná 12<br>
+          110 00 Praha 1<br>
+          Czech Republic
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2">
+        <div class="contact-block-title">Phone & Email</div>
+        <div class="contact-block-val">
+          <a href="tel:+420222111333">+420 222 111 333</a><br>
+          <a href="mailto:book@bladeandco.cz">book@bladeandco.cz</a>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-3">
+        <div class="contact-block-title">Opening Hours</div>
+        <div class="hours-grid">
+          <div class="hours-row"><span>Monday</span><span>10–19</span></div>
+          <div class="hours-row"><span>Tuesday</span><span>10–19</span></div>
+          <div class="hours-row"><span>Wednesday</span><span>10–19</span></div>
+          <div class="hours-row"><span>Thursday</span><span>10–20</span></div>
+          <div class="hours-row"><span>Friday</span><span>10–20</span></div>
+          <div class="hours-row"><span>Saturday</span><span>09–17</span></div>
+          <div class="hours-row"><span>Sunday</span><span>Closed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-form reveal reveal-delay-2">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" placeholder="Tomáš"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" placeholder="Novák"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" placeholder="+420 ..."/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="you@example.com"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Service</label>
+          <select>
+            <option value="">— Select Service —</option>
+            <option>Classic Haircut</option>
+            <option>Royal Shave</option>
+            <option>Beard Sculpt</option>
+            <option>Cut & Shave Package</option>
+            <option>Hair Coloring</option>
+            <option>Scalp Ritual</option>
+            <option>Full Experience</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preferred Date</label>
+          <input type="date"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <textarea placeholder="Any special requests, allergies, or preferences…"></textarea>
+      </div>
+      <button class="form-submit" type="button" onclick="handleSubmit(this)">
+        <span>Request Appointment →</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Blade & Co.</div>
+  <div class="footer-copy">© 2025 Blade & Co. Barbershop — Praha 1. All rights reserved.</div>
+  <div class="footer-socials">
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+    <a href="#">Google</a>
+  </div>
+</footer>
+
+<script>
+  // ── Cursor ──
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animateCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.14; ry += (my - ry) * 0.14;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+  document.querySelectorAll('a, button, .service-card, .price-row').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '6px'; cursor.style.height = '6px';
+      ring.style.width = '52px'; ring.style.height = '52px';
+      ring.style.borderColor = 'var(--gold)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '10px'; cursor.style.height = '10px';
+      ring.style.width = '36px'; ring.style.height = '36px';
+      ring.style.borderColor = 'var(--gold)';
+    });
+  });
+
+  // ── Navbar ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ── Scroll reveal ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Form submit ──
+  function handleSubmit(btn) {
+    const orig = btn.querySelector('span').textContent;
+    btn.querySelector('span').textContent = 'Sending…';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.querySelector('span').textContent = '✓ Request Received';
+      btn.style.background = '#2a6644';
+      btn.style.color = '#d0f0e0';
+      setTimeout(() => {
+        btn.querySelector('span').textContent = orig;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.disabled = false;
+      }, 3500);
+    }, 1200);
+  }
+</script>
+</body>
+</html>
